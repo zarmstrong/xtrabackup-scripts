@@ -40,6 +40,7 @@ PARALLEL_THREADS=4
 TAR_OPTIONS=cpvz
 NETCAT_PORT=9999
 USE_RSYNC=1
+IS_GALERA=0
 
 ## Script variables init.
 STREAM_MODE=0
@@ -175,6 +176,11 @@ XB_BACKUP_OPTS="--user=${BACKUP_USER} --password=${BACKUP_PASSWORD} --parallel=$
 ## USE RSYNC INSTEAD OF CP
 if [[ ${USE_RSYNC} == 1 ]]; then
     XB_BACKUP_OPTS="${XB_BACKUP_OPTS} --rsync"
+fi
+
+## ENABLE SAVING OF GALERA CLUSTER INFO
+if [[ ${IS_GALERA} == 1 ]]; then
+    XB_BACKUP_OPTS="${XB_BACKUP_OPTS} --galera-info"
 fi
 
 ## PARTIAL BACKUP OPTIONS
