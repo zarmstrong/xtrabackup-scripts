@@ -44,6 +44,7 @@ COMPRESSED_BACKUP_PATH=0
 
 ## Error display
 error() {
+    echo "$(date +%Y%m%d_%H%M%S) - $1" >> ${LOG_FILE}
     echo "$1" 1>&2
     exit 1
 }
@@ -152,6 +153,7 @@ then
 
 	REPOSITORY_ROOT=`echo "${COMPRESSED_BACKUP_PATH}" | sed 's/\(.*[0-9]\)\/.*$/\1/'`
 	echo "ROOT IS: ${REPOSITORY_ROOT}"
+	log "ROOT IS: ${REPOSITORY_ROOT}"
 
 	for BACKUP_ARCHIVE in `cat ${TMP_DIR}/XTRABACKUP_BACKUP_LIST.txt | sed 's/.*=\(.*\)$/\1/'`
 	do
@@ -160,6 +162,7 @@ then
 		# BASE BACKUP
 		if [[ ! -f ${REPOSITORY_ROOT}/${BACKUP_ARCHIVE} ]]; then
 		    echo "Could not locate base backup ${REPOSITORY_ROOT}/${BACKUP_ARCHIVE} for incremental restoration. Aborting."
+		    log "Could not locate base backup ${REPOSITORY_ROOT}/${BACKUP_ARCHIVE} for incremental restoration. Aborting."
 		    exit 1
 		    
 		fi
@@ -173,6 +176,7 @@ then
 		# INC BACKUP
 		if [[ ! -f ${REPOSITORY_ROOT}/INC/${BACKUP_ARCHIVE} ]]; then
 		    echo "Could not locate incremental backup ${REPOSITORY_ROOT}/INC/${BACKUP_ARCHIVE} for incremental restoration. Aborting."
+		    log "Could not locate incremental backup ${REPOSITORY_ROOT}/INC/${BACKUP_ARCHIVE} for incremental restoration. Aborting."
 		    exit 1
 		fi
 		tar -xpvz -f ${REPOSITORY_ROOT}/INC/${BACKUP_ARCHIVE} -C ${TMP_DIR}
@@ -201,6 +205,7 @@ then
 else
     ## STREAM RESTORATION
     echo "Network listening..."
+    log "Network listening..."
     cd ${MYSQL_DATA_DIR}
     ${NETCAT_BIN} -l ${NETCAT_PORT} | xbstream -x -v
 
