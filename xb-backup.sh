@@ -53,16 +53,16 @@ DESTINATION_HOST=0
 LSN_NUMBER=0
 BACKUP_REPOSITORY_ROOT=0
 
+## Logging
+log() {
+    echo "$(date +%Y%m%d_%H%M%S) - $1" >> ${LOG_FILE}
+}
+
 ## Error display
 error() {
     log "$1"
     echo "$1" 1>&2
     exit 1
-}
-
-## Logging
-log() {
-    echo "$(date +%Y%m%d_%H%M%S) - $1" >> ${LOG_FILE}
 }
 
 ## Usage display
