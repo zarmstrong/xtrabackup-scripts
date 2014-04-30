@@ -42,18 +42,17 @@ PARTIAL_MODE=0
 INCREMENTAL=0
 COMPRESSED_BACKUP_PATH=0
 
-## Error display
-error() {
-    echo "$(date +%Y%m%d_%H%M%S) - $1" >> ${LOG_FILE}
-    echo "$1" 1>&2
-    exit 1
-}
-
 ## Logging
 log() {
     echo "$(date +%Y%m%d_%H%M%S) - $1" >> ${LOG_FILE}
 }
 
+## Error display
+error() {
+    log "$1"
+    echo "$1" 1>&2
+    exit 1
+}
 ## Usage display
 usage() {
 
