@@ -55,6 +55,7 @@ BACKUP_REPOSITORY_ROOT=0
 
 ## Error display
 error() {
+    log "$1"
     echo "$1" 1>&2
     exit 1
 }
@@ -169,7 +170,7 @@ if [[ ! -d ${TMP_DIR} ]]; then
 fi
 
 ## MAIN
-log "Backup - STARTED AT `date`"
+log "Backup - STARTED"
 log "LSN Number: ${LSN_NUMBER}"
 XB_BACKUP_OPTS="--user=${BACKUP_USER} --password=${BACKUP_PASSWORD} --parallel=${PARALLEL_THREADS} --no-lock --no-timestamp"
 
@@ -218,7 +219,7 @@ then
 
     ## BACKUP
     ${INNOBACKUPEX_BIN} ${XB_BACKUP_OPTS} ${TMP_DIR}/${BACKUP_FOLDER}
-    log "Data backup: OK AT `date`"
+    log "Data backup: OK"
 
     if [[ ${PARTIAL_MODE} == 1 ]]; then
 	cp ${TABLE_DEF_FILE} ${TMP_DIR}/${BACKUP_FOLDER}/
@@ -239,7 +240,7 @@ then
 
     ## BACKUP COMPRESSION
     tar ${TAR_OPTIONS} -f ${TMP_DIR}/${BACKUP_ARCHIVE} -C ${TMP_DIR} ${BACKUP_FOLDER}
-    log "Backup compression: OK AT `date`"
+    log "Backup compression: OK"
     CURRENT_LSN=`cat ${TMP_DIR}/XTRABACKUP_LAST_LSN.txt`
     log "Backup LSN: ${CURRENT_LSN}"
 
@@ -250,7 +251,7 @@ then
     ## SEND BACKUP TO REPOSITORY
     mv ${TMP_DIR}/${BACKUP_ARCHIVE} ${BACKUP_REPOSITORY}/
     rm -rf ${TMP_DIR}/${BACKUP_FOLDER}
-    log "Backup uploaded to repository [${BACKUP_REPOSITORY}] AT `date`."
+    log "Backup uploaded to repository [${BACKUP_REPOSITORY}]."
 
 else
     ## STREAMED BACKUP MODE
@@ -259,6 +260,6 @@ else
     ${INNOBACKUPEX_BIN} ${XB_BACKUP_OPTS} ./ | ${NETCAT_BIN} ${DESTINATION_HOST} ${NETCAT_PORT}
 fi
 
-log "Backup - END AT `date`"
+log "Backup - END"
 
 exit 0 
