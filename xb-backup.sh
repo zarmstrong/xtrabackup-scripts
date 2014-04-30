@@ -39,6 +39,7 @@ BACKUP_DATETIME=$(date +%Y%m%d_%H%M%S)
 PARALLEL_THREADS=4
 TAR_OPTIONS=cpvz
 NETCAT_PORT=9999
+USE_RSYNC=1
 
 ## Script variables init.
 STREAM_MODE=0
@@ -167,8 +168,14 @@ if [[ ! -d ${TMP_DIR} ]]; then
 fi
 
 ## MAIN
-log "Backup - START"
+log "Backup - STARTED AT `date`"
+log "LSN Number: ${LSN_NUMBER}"
 XB_BACKUP_OPTS="--user=${BACKUP_USER} --password=${BACKUP_PASSWORD} --parallel=${PARALLEL_THREADS} --no-lock --no-timestamp"
+
+## USE RSYNC INSTEAD OF CP
+if [[ ${USE_RSYNC} == 1 ]]; then
+    XB_BACKUP_OPTS="${XB_BACKUP_OPTS} --rsync"
+fi
 
 ## PARTIAL BACKUP OPTIONS
 if [[ ${PARTIAL_MODE} == 1 ]]; then
@@ -179,6 +186,7 @@ fi
 if [[ ${INCREMENTAL} == 1 ]]; then
     XB_BACKUP_OPTS="${XB_BACKUP_OPTS} --incremental --incremental-lsn=${LSN_NUMBER}"
 fi
+
 
 if [[ ${HARD_MODE} == 1 ]]
 then
@@ -204,7 +212,7 @@ then
 
     ## BACKUP
     ${INNOBACKUPEX_BIN} ${XB_BACKUP_OPTS} ${TMP_DIR}/${BACKUP_FOLDER}
-    log "Data backup: OK"
+    log "Data backup: OK AT `date`"
 
     if [[ ${PARTIAL_MODE} == 1 ]]; then
 	cp ${TABLE_DEF_FILE} ${TMP_DIR}/${BACKUP_FOLDER}/
@@ -225,7 +233,9 @@ then
 
     ## BACKUP COMPRESSION
     tar ${TAR_OPTIONS} -f ${TMP_DIR}/${BACKUP_ARCHIVE} -C ${TMP_DIR} ${BACKUP_FOLDER}
-    log "Backup compression: OK"
+    log "Backup compression: OK AT `date`"
+    CURRENT_LSN=`cat ${TMP_DIR}/XTRABACKUP_LAST_LSN.txt`
+    log "Backup LSN: ${CURRENT_LSN}"
 
     if [[ ! -d ${BACKUP_REPOSITORY} ]]; then
 	mkdir -pv ${BACKUP_REPOSITORY}
@@ -234,7 +244,7 @@ then
     ## SEND BACKUP TO REPOSITORY
     mv ${TMP_DIR}/${BACKUP_ARCHIVE} ${BACKUP_REPOSITORY}/
     rm -rf ${TMP_DIR}/${BACKUP_FOLDER}
-    log "Backup uploaded to repository [${BACKUP_REPOSITORY}]."
+    log "Backup uploaded to repository [${BACKUP_REPOSITORY}] AT `date`."
 
 else
     ## STREAMED BACKUP MODE
@@ -243,6 +253,6 @@ else
     ${INNOBACKUPEX_BIN} ${XB_BACKUP_OPTS} ./ | ${NETCAT_BIN} ${DESTINATION_HOST} ${NETCAT_PORT}
 fi
 
-log "Backup - END"
+log "Backup - END AT `date`"
 
 exit 0 
