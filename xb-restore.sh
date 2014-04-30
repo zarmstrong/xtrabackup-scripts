@@ -53,8 +53,7 @@ error() {
     echo "$1" 1>&2
     exit 1
 }
-## Usag
-e display
+## Usage display
 usage() {
 
     cat <<EOF
